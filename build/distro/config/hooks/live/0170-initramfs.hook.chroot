@@ -1,0 +1,36 @@
+#!/bin/sh
+set -e
+# Generate the initrd for the Aether kernel.
+# The bindeb-pkg linux-image-aether postinst runs before initramfs-tools is
+# installed in the chroot, so update-initramfs is a silent no-op and NO
+# initrd.img ever lands in /boot — which killed binary_syslinux (round 6).
+# This hook runs after ALL package-affecting hooks (0120-0160) and before
+# the 0900-cleanup hook, when /lib/modules and initramfs-tools are final.
+
+KVER=$(ls /lib/modules/ 2>/dev/null | grep -v '^virtual' | sort -V | tail -1) || true
+
+if [ -z "${KVER:-}" ]; then
+  echo "0170-initramfs: no kernel modules found in /lib/modules — cannot build initrd" >&2
+  exit 1
+fi
+
+echo "0170-initramfs: generating initrd for ${KVER}"
+depmod -a "${KVER}"
+
+# live images have no swap resume target; avoid boot delays/hangs
+mkdir -p /etc/initramfs-tools/conf.d
+echo "RESUME=none" > /etc/initramfs-tools/conf.d/resume
+
+update-initramfs -c -k "${KVER}" || update-initramfs -u -k "${KVER}"
+
+if [ ! -e "/boot/initrd.img-${KVER}" ]; then
+  echo "0170-initramfs: initrd generation FAILED for ${KVER}" >&2
+  exit 1
+fi
+
+# protect kernel + initramfs from the 0900-cleanup autoremove
+apt-mark manual linux-image-aether initramfs-tools 2>/dev/null || true
+
+echo "0170-initramfs: OK"
+ls -la /boot/
+exit 0
