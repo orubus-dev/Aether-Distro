@@ -16,7 +16,22 @@ case "$STAGE" in
     chmod +x auto/config
     [ -f config/packages.chroot/linux-image-aether_*.deb ] || { echo "kernel deb missing — run build/kernel/build.sh first"; exit 1; }
     ./auto/config
-    lb bootstrap && lb chroot && lb binary
+    lb bootstrap && lb chroot
+    # live-build's binary_linux-image exits early with --linux-packages none,
+    # so the bootloaders never see a kernel. Copy ours into binary/live
+    # (same thing binary_linux-image does with LB_INITRAMFS=live-boot).
+    mkdir -p binary/live
+    FOUND=0
+    for f in chroot/boot/vmlinuz-* chroot/boot/vmlinux-* chroot/boot/initrd.img-*; do
+      if [ -e "$f" ]; then cp -a "$f" binary/live/ && FOUND=1; fi
+    done
+    if [ "$FOUND" != "1" ]; then
+      echo "ERROR: no kernel image/initrd in chroot/boot — linux-image-aether deb did not install a kernel?" >&2
+      ls -la chroot/boot/ || true
+      exit 1
+    fi
+    ls -la binary/live/
+    lb binary
     mkdir -p "$ISO_OUT" && cp -f images/*.iso "$ISO_OUT/" 2>/dev/null || cp -f *.iso "$ISO_OUT/" 2>/dev/null || true
     ;;
   clean) sudo lb clean --purge 2>/dev/null || lb clean --purge || rm -rf chroot .build cache binary images local* ;;
