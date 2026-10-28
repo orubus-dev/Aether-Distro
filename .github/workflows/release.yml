@@ -33,9 +33,19 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: aetheros-iso
-          path: dist
+          path: artifact-raw
           run-id: ${{ inputs.run_id }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Stage ISO at dist/
+        run: |
+          # upload-artifact stores paths relative to the files' common ancestor
+          # (the workspace root), so the zip holds dist/*.iso + dist/SHA256SUMS +
+          # serial.log; downloaded into artifact-raw/ they sit at artifact-raw/dist/.
+          mkdir -p dist
+          if [ -d artifact-raw/dist ]; then mv artifact-raw/dist/* dist/; else mv artifact-raw/* dist/; fi
+          rm -rf artifact-raw
+          ls -la dist/
+          test -s dist/SHA256SUMS || echo "WARN: no SHA256SUMS in artifact"
       - name: Publish
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -43,7 +53,5 @@ jobs:
           TAG: ${{ inputs.tag }}
           ARTIFACT_URL: ${{ inputs.artifact_url }}
         run: |
-          ls -la dist/
-          test -s dist/SHA256SUMS || echo "WARN: no SHA256SUMS in artifact"
           chmod +x ci/release.sh
           ./ci/release.sh

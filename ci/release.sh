@@ -7,7 +7,11 @@ set -euo pipefail
 API="https://api.github.com"
 AUTH="Authorization: token $GH_TOKEN"
 ISO=$(ls dist/*.iso | head -1)
-NAME=$(basename "$ISO")
+# ship under a human name instead of live-image-amd64.hybrid.iso
+DISP="AetherOS-1.0-amd64.iso"
+[ "$(basename "$ISO")" = "$DISP" ] || cp -f "$ISO" "dist/$DISP"
+ISO="dist/$DISP"
+NAME="$DISP"
 SHA=$(sha256sum "$ISO" | cut -d' ' -f1)
 SIZE=$(stat -c%s "$ISO")
 CAP=2147483648   # GitHub release-asset cap (2 GiB)
