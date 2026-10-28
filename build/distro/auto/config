@@ -13,7 +13,7 @@ lb config noauto \
   --iso-volume "AetherOS-1.0" \
   --iso-application "AetherOS 1.0 (Nebula)" \
   --iso-publisher "Aether Project; https://github.com/orubus-dev/Aether-Distro" \
-  --bootappend-live "boot=live components quiet splash console=ttyS0,115200 console=tty0" \
+  --bootappend-live "boot=live components splash console=ttyS0,115200 console=tty0" \
   --squashfs-compression zstd \
   --squashfs-compression-level 19 \
   --updates true --security true --backports false \

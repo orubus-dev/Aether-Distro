@@ -38,6 +38,15 @@ fi
 cp .config "$OUT/config-$VER-aether"
 
 JOBS="${AETHER_KERNEL_JOBS:-$(nproc)}"
+# clean debian packaging metadata (dpkg-buildpackage wants a real identity)
+export DEBFULLNAME="Aether Project"
+export DEBEMAIL="build@aetheros.org"
+# bindeb-pkg drives debhelper tools (dh_listpackages et al.) — must exist, not just be provided
+if ! command -v dh_listpackages >/dev/null 2>&1; then
+  apt-get update -qq >/dev/null 2>&1 || true
+  DEBIAN_FRONTEND=noninteractive apt-get install -y -qq debhelper >/dev/null 2>&1 || true
+fi
+command -v dh_listpackages >/dev/null 2>&1 || { echo "FATAL: debhelper (dh_listpackages) unavailable — bindeb-pkg cannot run" >&2; exit 1; }
 # kernel's generated debian/control wants debhelper-compat (= 12); trixie only ships (= 13).
 # Provide it with a versioned-Provides dummy (same mechanism debhelper itself uses), plus real kmod.
 if ! dpkg -s debhelper-compat-dummy >/dev/null 2>&1; then
@@ -55,6 +64,7 @@ echo "[aether-kernel] deb at: $IMG_DEB"
 PKG="$ROOT/build/kernel/pkg"; rm -rf "$PKG"; mkdir -p "$PKG"
 dpkg-deb -R "$IMG_DEB" "$PKG"
 sed -i 's/^Package: .*/Package: linux-image-aether/; s/^Version: .*/Version: 1.0.0/; s/^Depends: .*/Depends: linux-base, initramfs-tools | linux-initramfs-tool/; /Provides:/d' "$PKG/DEBIAN/control"
+grep -q "^Maintainer:" "$PKG/DEBIAN/control" || sed -i '/^Package:/a Maintainer: Aether Project <build@aetheros.org>' "$PKG/DEBIAN/control"
 grep -q "^Provides:" "$PKG/DEBIAN/control" || sed -i '/^Depends:/a Provides: linux-image' "$PKG/DEBIAN/control"
 dpkg-deb -b "$PKG" "$OUT/linux-image-aether_1.0.0_amd64.deb" >/dev/null
 echo "[aether-kernel] DONE: $OUT/linux-image-aether_1.0.0_amd64.deb"

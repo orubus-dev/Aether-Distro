@@ -19,7 +19,7 @@ jobs:
       - name: Build kernel
         run: |
           apt-get update -qq
-          DEBIAN_FRONTEND=noninteractive apt-get install -y -qq curl xz-utils libarchive-tools build-essential flex bison libssl-dev libelf-dev bc cpio python3 dpkg-dev rsync ca-certificates >/dev/null
+          DEBIAN_FRONTEND=noninteractive apt-get install -y -qq curl xz-utils libarchive-tools build-essential flex bison libssl-dev libelf-dev bc cpio python3 dpkg-dev rsync ca-certificates debhelper kmod >/dev/null
           chmod +x build/kernel/build.sh
           ./build/kernel/build.sh
       - name: Upload kernel package
@@ -55,6 +55,24 @@ jobs:
           ./build/distro/build.sh all
           ls -la dist/
           sha256sum dist/*.iso | tee dist/SHA256SUMS
+      - name: Verify ISO structure
+        run: |
+          ISO=$(ls dist/*.iso | head -1)
+          echo "ISO: $ISO ($(stat -c%s "$ISO") bytes)"
+          file "$ISO"
+          xorriso -indev "$ISO" -report_el_torito as_mkisofs 2>/dev/null | head -20
+          test -s "$ISO" && echo "STRUCTURE OK"
+      - name: Smoke boot (QEMU)
+        run: |
+          ISO=$(ls dist/*.iso | head -1)
+          ACCEL=tcg
+          if [ -w /dev/kvm ]; then ACCEL=kvm; echo "KVM available"; else echo "no KVM — TCG fallback"; fi
+          timeout 1500 qemu-system-x86_64 -machine q35 -m 2048 -smp 2 \
+            -accel "$ACCEL" -cdrom "$ISO" -display none -no-reboot \
+            -serial file:serial.log || true
+          echo "--- serial tail ---"; tail -40 serial.log || true
+          if grep -qE "Linux version 6\.12" serial.log; then echo "KERNEL BOOTED: AetherOS 6.12 kernel is alive"; else echo "kernel banner not seen"; exit 1; fi
+          grep -qE "Reached target|systemd" serial.log && echo "INIT ALIVE: systemd reached boot targets" || true
       - name: Upload ISO artifact
         uses: actions/upload-artifact@v4
         with:
@@ -62,6 +80,7 @@ jobs:
           path: |
             dist/*.iso
             dist/SHA256SUMS
+            serial.log
       - name: Release (tags only)
         if: startsWith(github.ref, 'refs/tags/v')
         env:
