@@ -6,7 +6,10 @@ cd "$(dirname "$0")"
 STAGE="${1:-all}"
 
 # install our kernel + local packages, then assemble
-export ISO_OUT="$(dirname "$0")/../../dist"
+# ISO_OUT must be ABSOLUTE: build.sh cd's into build/distro, so a relative
+# path would resolve against that CWD and drop the ISO in build/dist instead
+# of <repo>/dist (which is what CI's `ls dist/` + artifact upload expect).
+export ISO_OUT="$(cd "$(dirname "$0")/../.." && pwd)/dist"
 
 case "$STAGE" in
   bootstrap) chmod +x auto/config && ./auto/config && lb bootstrap ;;
@@ -32,7 +35,17 @@ case "$STAGE" in
     fi
     ls -la binary/live/
     lb binary
-    mkdir -p "$ISO_OUT" && cp -f images/*.iso "$ISO_OUT/" 2>/dev/null || cp -f *.iso "$ISO_OUT/" 2>/dev/null || true
+    mkdir -p "$ISO_OUT"
+    # live-build writes the ISO into its CWD (build/distro): find it wherever
+    # it landed and copy every *.iso into $ISO_OUT, then FAIL if none exists.
+    find . config images -maxdepth 2 -name '*.iso' -type f -exec cp -f {} "$ISO_OUT/" \; 2>/dev/null || true
+    ls -la "$ISO_OUT/"
+    if ! ls "$ISO_OUT"/*.iso >/dev/null 2>&1; then
+      echo "ERROR: no ISO produced by lb binary" >&2
+      find . -maxdepth 2 -name '*.iso' -o -name '*.hybrid.iso' 2>/dev/null || true
+      exit 1
+    fi
+    sha256sum "$ISO_OUT"/*.iso | tee "$ISO_OUT/SHA256SUMS"
     ;;
   clean) sudo lb clean --purge 2>/dev/null || lb clean --purge || rm -rf chroot .build cache binary images local* ;;
   *) echo "usage: $0 bootstrap|chroot|binary|all|clean"; exit 1 ;;
