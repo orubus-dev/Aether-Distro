@@ -15,6 +15,9 @@ A real laptop operating system built from the Linux kernel up — gaming-tuned, 
 | Installer | Calamares with Aether branding — full-disk or manual, LUKS capable, EFI + Secure Boot |
 | Floor | Debian 13 (trixie) base binaries — v1.1+ replaces these with our own package repo |
 
+## Run it — no flashing required
+Download the ISO from [Releases](https://github.com/orubus-dev/Aether-Distro/releases) and read **[docs/NO-FLASH-START.md](docs/NO-FLASH-START.md)**: Ventoy (flash a stick once, then every ISO is just a file you copy and boot), the full phone-only workflow (download + USB-OTG copy + boot), or zero-USB (open the ISO in VirtualBox).
+
 ## Build it
 ```bash
 ./build/kernel/build.sh      # kernel: kernel.org source -> linux-image-aether .deb

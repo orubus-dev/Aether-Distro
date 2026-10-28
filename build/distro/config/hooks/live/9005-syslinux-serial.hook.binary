@@ -8,11 +8,15 @@ set -e
 if [ -f binary/isolinux/isolinux.cfg ]; then
   grep -q "^serial " binary/isolinux/isolinux.cfg || \
     sed -i '1i serial 0 115200\nconsole 0 115200' binary/isolinux/isolinux.cfg
+  # headless/CI boot must never sit at the menu: guarantee an auto-boot timeout
+  grep -qi "^timeout " binary/isolinux/isolinux.cfg || \
+    sed -i '/^serial /a timeout 50' binary/isolinux/isolinux.cfg
 fi
 if [ -d binary/isolinux ]; then
   for f in binary/isolinux/*.cfg; do
     [ -f "$f" ] || continue
     grep -q "^serial " "$f" || sed -i '1i serial 0 115200\nconsole 0 115200' "$f"
+    grep -qi "^timeout " "$f" || sed -i '/^serial /a timeout 50' "$f"
   done
 fi
 exit 0
