@@ -32,13 +32,17 @@ jobs:
     name: Assemble AetherOS 1.0 ISO
     needs: kernel
     runs-on: ubuntu-latest
-    container: debian:trixie
+    container:
+      image: debian:trixie
+      # live-build must mount /proc, /dev/pts and bind-mount into the chroot;
+      # GH-hosted containers drop CAP_SYS_ADMIN unless --privileged is set.
+      options: --privileged
     steps:
       - uses: actions/checkout@v4
       - name: Install build deps
         run: |
           apt-get update -qq
-          DEBIAN_FRONTEND=noninteractive apt-get install -y -qq live-build debootstrap debian-archive-keyring squashfs-tools xorriso mtools dosfstools grub-efi-amd64-bin grub-pc-bin python3 curl ca-certificates git jq >/dev/null
+          DEBIAN_FRONTEND=noninteractive apt-get install -y -qq live-build debootstrap debian-archive-keyring squashfs-tools xorriso mtools dosfstools grub-efi-amd64-bin grub-pc-bin qemu-system-x86 python3 curl ca-certificates git jq >/dev/null
       - name: Fetch kernel package
         uses: actions/download-artifact@v4
         with:
