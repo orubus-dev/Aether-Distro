@@ -1,5 +1,8 @@
 #!/bin/sh
 # AetherOS live-build configuration — Debian 13 floor, our kernel, Plasma 6 desktop.
+# Live-build 20250814 (trixie): --username/--password/--hostname/--locales/--timezone
+# and --squashfs-compression{,-level} no longer exist — user/identity/locale move to
+# live-config boot parameters, squashfs compression moved to --chroot-squashfs-*.
 lb config noauto \
   --architecture amd64 \
   --distribution trixie \
@@ -8,15 +11,11 @@ lb config noauto \
   --apt apt \
   --apt-options "--yes -o Acquire::Retries=5" \
   --linux-packages none \
-  --username aether --password aether \
-  --hostname aetheros \
   --iso-volume "AetherOS-1.0" \
   --iso-application "AetherOS 1.0 (Nebula)" \
   --iso-publisher "Aether Project; https://github.com/orubus-dev/Aether-Distro" \
-  --bootappend-live "boot=live components splash console=ttyS0,115200 console=tty0" \
-  --squashfs-compression zstd \
-  --squashfs-compression-level 19 \
+  --bootappend-live "boot=live components splash live-config.hostname=aetheros live-config.username=aether live-config.user-default-passwd=aether live-config.locale=en_US.UTF-8 live-config.timezone=Etc/UTC console=ttyS0,115200 console=tty0" \
+  --chroot-squashfs-compression-type zstd \
+  --chroot-squashfs-compression-level 19 \
   --updates true --security true --backports false \
-  --locales en_US.UTF-8 \
-  --timezone Etc/UTC \
   "${@}"
