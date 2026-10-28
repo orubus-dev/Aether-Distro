@@ -38,6 +38,14 @@ fi
 cp .config "$OUT/config-$VER-aether"
 
 JOBS="${AETHER_KERNEL_JOBS:-$(nproc)}"
+# kernel's generated debian/control wants debhelper-compat (= 12); trixie only ships (= 13).
+# Provide it with a versioned-Provides dummy (same mechanism debhelper itself uses), plus real kmod.
+if ! dpkg -s debhelper-compat-dummy >/dev/null 2>&1; then
+  D=/tmp/dhc12; rm -rf "$D" /tmp/dhc12.deb; mkdir -p "$D/DEBIAN"
+  printf 'Package: debhelper-compat-dummy\nVersion: 1.0\nSection: devel\nPriority: optional\nArchitecture: all\nProvides: debhelper-compat (= 12)\nDescription: satisfies linux bindeb-pkg build-dependency\n' > "$D/DEBIAN/control"
+  dpkg-deb --build "$D" /tmp/dhc12.deb >/dev/null && dpkg -i /tmp/dhc12.deb >/dev/null
+  apt-get install -y kmod >/dev/null 2>&1 || true
+fi
 make -j"$JOBS" bindeb-pkg >/tmp/aether-kernel-build.log 2>&1 || { tail -30 /tmp/aether-kernel-build.log; exit 1; }
 echo "[aether-kernel] compiled"
 
