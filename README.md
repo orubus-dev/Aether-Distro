@@ -35,7 +35,3 @@ make all   # 14 test suites: foundation, services, Aegis security, capabilities,
 - docs/bridge-v1.md — how v1.0 maps the layers to shipped components
 - docs/roadmap.md — phases
 
-## Status
-Phase 1 (core, capability model, security) — **complete, 14/14 tests pass.**
-Phase 2 (bootable Aether) — **complete for the desktop edition: v1.0 ISO ships.**
-Phase 3+ — hardware capability services continue growing toward the native Aether init (core/ and 03-init/ build and run today).
