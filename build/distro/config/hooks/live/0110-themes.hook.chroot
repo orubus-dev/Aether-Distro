@@ -1,19 +1,35 @@
 #!/bin/sh
 set -e
-# WhiteSur suite — the macOS look (icons, GTK theme, cursors), pinned upstream snapshots
+# WhiteSur suite — the macOS look (icons, GTK theme, cursors), pinned upstream snapshots.
+# Theming is COSMETIC: every step is best-effort; a failed fetch/install must never
+# abort the ISO build (this hook was the cause of the round-4 build failure).
 cd /tmp
 fetch() { for b in "$2" master; do curl -fsSL -o /tmp/gh.tgz "https://github.com/$1/archive/refs/heads/$b.tar.gz" 2>/dev/null && return 0; done; return 1; }
-fetch vinceliuice/WhiteSur-icon-theme 2025-05-15 && { tar xf /tmp/gh.tgz && cd WhiteSur-icon-theme-* && ./install.sh -d /usr/share/icons >/dev/null 2>&1 || ./install.sh -d /usr/share/icons; cd /tmp; }
+
+fetch vinceliuice/WhiteSur-icon-theme 2025-05-15 && { tar xf /tmp/gh.tgz && cd WhiteSur-icon-theme-* && { ./install.sh -d /usr/share/icons >/dev/null 2>&1 || ./install.sh -d /usr/share/icons || true; } ; cd /tmp ; } || true
 rm -rf /tmp/WhiteSur-icon-theme-*
-fetch vinceliuice/WhiteSur-gtk-theme && { tar xf /tmp/gh.tgz && cd WhiteSur-gtk-theme-* && ./install.sh --dest /usr/share/themes -l >/dev/null 2>&1 || ./install.sh --dest /usr/share/themes; cd /tmp; }
+
+fetch vinceliuice/WhiteSur-gtk-theme 2025-05-15 && { tar xf /tmp/gh.tgz && cd WhiteSur-gtk-theme-* && { ./install.sh --dest /usr/share/themes -l >/dev/null 2>&1 || ./install.sh --dest /usr/share/themes || true; } ; cd /tmp ; } || true
 rm -rf /tmp/WhiteSur-gtk-theme-*
-fetch vinceliuice/WhiteSur-cursors && { tar xf /tmp/gh.tgz && cd WhiteSur-cursors-* && ./install.sh -d /usr/share/icons >/dev/null 2>&1 || ./install.sh -d /usr/share/icons; cd /tmp; }
+
+fetch vinceliuice/WhiteSur-cursors 2025-05-15 && { tar xf /tmp/gh.tgz && cd WhiteSur-cursors-* && { ./install.sh -d /usr/share/icons >/dev/null 2>&1 || ./install.sh -d /usr/share/icons || true; } ; cd /tmp ; } || true
 rm -rf /tmp/WhiteSur-cursors-* /tmp/gh.tgz
-# GTK4 system-wide links + skel
+
+# GTK4 system-wide links + skel (only when the theme actually landed)
 mkdir -p /etc/skel/.config/gtk-4.0
-[ -d /usr/share/themes/WhiteSur-Dark/gtk-4.0 ] && for f in gtk.css gtk-dark.css assets; do ln -sfn /usr/share/themes/WhiteSur-Dark/gtk-4.0/$f /etc/skel/.config/gtk-4.0/$f; done
-# pick existing icon dir variant
-ICONS=$(ls /usr/share/icons | grep -i "^WhiteSur" | sort | head -1)
-[ -n "$ICONS" ] && { sed -i "s/^Theme=.*/Theme=$ICONS/" /etc/gtk-3.0/settings.ini /etc/gtk-4.0/settings.ini /etc/skel/.config/gtk-3.0/settings.ini 2>/dev/null || true; }
-# SDDM breeze background -> Aether wallpaper
-grep -q background /usr/share/sddm/themes/breeze/theme.conf 2>/dev/null && sed -i 's|^background=.*|background=/usr/share/wallpapers/Aether-Night/contents/images/2560x1440.png|' /usr/share/sddm/themes/breeze/theme.conf || true
+if [ -d /usr/share/themes/WhiteSur-Dark/gtk-4.0 ]; then
+  for f in gtk.css gtk-dark.css assets; do ln -sfn /usr/share/themes/WhiteSur-Dark/gtk-4.0/$f /etc/skel/.config/gtk-4.0/$f; done
+fi
+
+# pick existing icon dir variant (never fatal)
+ICONS=$(ls /usr/share/icons 2>/dev/null | grep -i "^WhiteSur" | sort | head -1) || true
+if [ -n "${ICONS:-}" ]; then
+  sed -i "s/^Theme=.*/Theme=$ICONS/" /etc/gtk-3.0/settings.ini /etc/gtk-4.0/settings.ini /etc/skel/.config/gtk-3.0/settings.ini 2>/dev/null || true
+fi
+
+# SDDM breeze background -> Aether wallpaper (best-effort)
+if grep -q background /usr/share/sddm/themes/breeze/theme.conf 2>/dev/null; then
+  sed -i 's|^background=.*|background=/usr/share/wallpapers/Aether-Night/contents/images/2560x1440.png|' /usr/share/sddm/themes/breeze/theme.conf || true
+fi
+
+exit 0
