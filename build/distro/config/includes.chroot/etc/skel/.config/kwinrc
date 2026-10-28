@@ -1,0 +1,12 @@
+[Compositing]
+OpenGLIsUnsafe=false
+
+[Plugins]
+blurEnabled=true
+kwin4_effect_dimscreenEnabled=false
+
+[org.kde.kdecoration2]
+ButtonsOnLeft=
+ButtonsOnRight=XC
+library=org.kde.kwin decoration.oxygen
+theme=Breeze

@@ -1,0 +1,71 @@
+name: AetherOS ISO
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  kernel:
+    name: Compile AetherOS kernel from kernel.org source
+    runs-on: ubuntu-latest
+    container: debian:trixie
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build kernel
+        run: |
+          apt-get update -qq
+          DEBIAN_FRONTEND=noninteractive apt-get install -y -qq curl xz-utils libarchive-tools build-essential flex bison libssl-dev libelf-dev bc cpio python3 dpkg-dev rsync ca-certificates >/dev/null
+          chmod +x build/kernel/build.sh
+          ./build/kernel/build.sh
+      - name: Upload kernel package
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-image-aether
+          path: dist/linux-image-aether_*.deb
+
+  iso:
+    name: Assemble AetherOS 1.0 ISO
+    needs: kernel
+    runs-on: ubuntu-latest
+    container: debian:trixie
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install build deps
+        run: |
+          apt-get update -qq
+          DEBIAN_FRONTEND=noninteractive apt-get install -y -qq live-build debootstrap debian-archive-keyring squashfs-tools xorriso mtools dosfstools grub-efi-amd64-bin grub-pc-bin python3 curl ca-certificates git jq >/dev/null
+      - name: Fetch kernel package
+        uses: actions/download-artifact@v4
+        with:
+          name: linux-image-aether
+          path: artifact-kernel
+      - name: Stage kernel into live-build
+        run: |
+          mkdir -p build/distro/config/packages.chroot
+          cp artifact-kernel/linux-image-aether_*.deb build/distro/config/packages.chroot/
+          ls -la build/distro/config/packages.chroot/
+      - name: Build ISO
+        run: |
+          chmod +x build/distro/build.sh
+          ./build/distro/build.sh all
+          ls -la dist/
+          sha256sum dist/*.iso | tee dist/SHA256SUMS
+      - name: Upload ISO artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: aetheros-iso
+          path: |
+            dist/*.iso
+            dist/SHA256SUMS
+      - name: Release (tags only)
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          TAG: ${{ github.ref_name }}
+        run: ./ci/release.sh

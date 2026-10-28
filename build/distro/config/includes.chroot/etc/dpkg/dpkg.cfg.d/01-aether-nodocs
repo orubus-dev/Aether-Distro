@@ -1,0 +1,7 @@
+# AetherOS size discipline: strip docs/locales/man from packages (en only)
+path-exclude=/usr/share/doc/*
+path-include=/usr/share/doc/*/copyright
+path-exclude=/usr/share/man/*
+path-exclude=/usr/share/locale/*
+path-include=/usr/share/locale/en*
+path-exclude=/usr/share/gnome/help/*

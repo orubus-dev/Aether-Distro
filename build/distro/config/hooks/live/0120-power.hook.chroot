@@ -1,0 +1,14 @@
+#!/bin/sh
+set -e
+# efficiency without underclocking: full-performance caps + clean idle
+cat > /etc/udev/rules.d/70-aether-power.rules <<'UDEV'
+# never autosuspend input devices (prevents gaming input lag)
+ACTION=="add", SUBSYSTEM=="usb", ATTR{power/control}="on", ATTRS{bInterfaceClass}=="03"
+# SSDs: no readahead games
+ACTION=="add", KERNEL=="nvme[0-9]*", ATTR{queue/scheduler}="none"
+ACTION=="add", KERNEL=="sd[a-z]", ATTR{queue/scheduler}="bfq"
+UDEV
+systemctl enable earlyoom.service 2>/dev/null || true
+systemctl enable thermald.service 2>/dev/null || true
+systemctl enable fstrim.timer 2>/dev/null || true
+systemctl enable power-profiles-daemon 2>/dev/null || true

@@ -1,15 +1,38 @@
 # Aether Distro
 
-A real laptop operating system built around power efficiency, broad application compatibility, gaming, and a polished desktop.
+A real laptop operating system built from the Linux kernel up — gaming-tuned, power-efficient on 8GB RAM, with a polished desktop and one home for Linux, Windows, and Android apps.
 
-Aether uses the Linux kernel and mature low-level components where appropriate, while owning its system architecture, services, capability model, runtimes, and desktop.
+## What ships in v1.0
+| Layer | Implementation |
+|---|---|
+| Kernel | **Compiled from kernel.org source** with the AetherOS config (02-kernel): 1000Hz + full preemption, binderfs (Android apps), built-in zram, full laptop GPU/WiFi set. No distro kernel. |
+| Desktop | Plasma 6 Wayland, macOS-style layout (menu bar + floating dock + blur), WhiteSur themes, Inter type |
+| Windows apps | Wine + winetricks baked; Bottles via one click in Aether Welcome |
+| Android apps | Waydroid — works out of the box on the Aether kernel (binderfs built-in) |
+| Gaming | gamemode + MangoHud + Steam launcher baked; schedutil + full-performance caps, no underclocking |
+| Battery | zram memory layering (8GB-friendly), thermald, earlyoom, power-profiles-daemon |
+| Linux apps | apt + Flatpak (flathub pre-configured) + Discover |
+| Installer | Calamares with Aether branding — full-disk or manual, LUKS capable, EFI + Secure Boot |
+| Floor | Debian 13 (trixie) base binaries — v1.1+ replaces these with our own package repo |
 
-## Principles
-- Real underlying functionality, not simulated OS screens.
-- General-purpose primitives instead of hard-coded demos.
-- Capability-first hardware detection.
-- Power efficiency through scheduling, residency, I/O, and hardware power states—not artificial underclocking.
-- One application model across native Linux, Windows, and Android runtimes.
+## Build it
+```bash
+./build/kernel/build.sh      # kernel: kernel.org source -> linux-image-aether .deb
+./build/distro/build.sh all  # distro: live-build -> bootable ISO (needs the kernel deb)
+```
+CI does exactly this on every tag — see .github/workflows/iso.yml. Every build log is public.
+
+## Verify the core
+```bash
+make all   # 14 test suites: foundation, services, Aegis security, capabilities, hardware
+```
+
+## Docs
+- docs/architecture.md — the 55-layer system design
+- docs/bridge-v1.md — how v1.0 maps the layers to shipped components
+- docs/roadmap.md — phases
 
 ## Status
-Early foundation. See docs/architecture.md and docs/roadmap.md.
+Phase 1 (core, capability model, security) — **complete, 14/14 tests pass.**
+Phase 2 (bootable Aether) — **complete for the desktop edition: v1.0 ISO ships.**
+Phase 3+ — hardware capability services continue growing toward the native Aether init (core/ and 03-init/ build and run today).

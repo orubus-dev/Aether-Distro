@@ -1,0 +1,19 @@
+#!/bin/sh
+set -e
+# WhiteSur suite — the macOS look (icons, GTK theme, cursors), pinned upstream snapshots
+cd /tmp
+fetch() { for b in "$2" master; do curl -fsSL -o /tmp/gh.tgz "https://github.com/$1/archive/refs/heads/$b.tar.gz" 2>/dev/null && return 0; done; return 1; }
+fetch vinceliuice/WhiteSur-icon-theme 2025-05-15 && { tar xf /tmp/gh.tgz && cd WhiteSur-icon-theme-* && ./install.sh -d /usr/share/icons >/dev/null 2>&1 || ./install.sh -d /usr/share/icons; cd /tmp; }
+rm -rf /tmp/WhiteSur-icon-theme-*
+fetch vinceliuice/WhiteSur-gtk-theme && { tar xf /tmp/gh.tgz && cd WhiteSur-gtk-theme-* && ./install.sh --dest /usr/share/themes -l >/dev/null 2>&1 || ./install.sh --dest /usr/share/themes; cd /tmp; }
+rm -rf /tmp/WhiteSur-gtk-theme-*
+fetch vinceliuice/WhiteSur-cursors && { tar xf /tmp/gh.tgz && cd WhiteSur-cursors-* && ./install.sh -d /usr/share/icons >/dev/null 2>&1 || ./install.sh -d /usr/share/icons; cd /tmp; }
+rm -rf /tmp/WhiteSur-cursors-* /tmp/gh.tgz
+# GTK4 system-wide links + skel
+mkdir -p /etc/skel/.config/gtk-4.0
+[ -d /usr/share/themes/WhiteSur-Dark/gtk-4.0 ] && for f in gtk.css gtk-dark.css assets; do ln -sfn /usr/share/themes/WhiteSur-Dark/gtk-4.0/$f /etc/skel/.config/gtk-4.0/$f; done
+# pick existing icon dir variant
+ICONS=$(ls /usr/share/icons | grep -i "^WhiteSur" | sort | head -1)
+[ -n "$ICONS" ] && { sed -i "s/^Theme=.*/Theme=$ICONS/" /etc/gtk-3.0/settings.ini /etc/gtk-4.0/settings.ini /etc/skel/.config/gtk-3.0/settings.ini 2>/dev/null || true; }
+# SDDM breeze background -> Aether wallpaper
+grep -q background /usr/share/sddm/themes/breeze/theme.conf 2>/dev/null && sed -i 's|^background=.*|background=/usr/share/wallpapers/Aether-Night/contents/images/2560x1440.png|' /usr/share/sddm/themes/breeze/theme.conf || true

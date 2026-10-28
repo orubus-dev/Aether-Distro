@@ -1,0 +1,78 @@
+#!/usr/bin/env python3
+# Aether Welcome — real actions for the three app ecosystems + system care.
+import os, subprocess, sys
+from PyQt6.QtWidgets import (QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel,
+                             QPushButton, QCheckBox, QFrame, QScrollArea, QStyle)
+from PyQt6.QtCore import Qt
+
+ACCENT = "#0a84ff"; BG = "#202024"; CARD = "#2c2c30"; FG = "#eeeeee"; DIM = "#9a9aa0"
+ACTIONS = [
+    ("Install Steam", "native Steam + Proton for gaming", "install-steam"),
+    ("Windows apps (Bottles)", "install Windows software cleanly", "install-bottles"),
+    ("Android apps (Waydroid)", "run Android apps in a window", "setup-waydroid"),
+    ("Lutris", "game library manager", "install-lutris"),
+    ("LibreOffice", "documents, sheets, slides", "install-libreoffice"),
+    ("GIMP", "image editing", "install-gimp"),
+    ("NVIDIA driver", "if this laptop has an NVIDIA GPU", "install-nvidia"),
+    ("System update", "refresh everything", "system-update"),
+]
+
+class Card(QFrame):
+    def __init__(self, title, desc, action):
+        super().__init__()
+        self.setStyleSheet(f"QFrame{{background:{CARD};border-radius:12px;}}")
+        h = QHBoxLayout(self); h.setContentsMargins(16,12,16,12)
+        ic = QLabel(); ic.setPixmap(self.style().standardIcon(QStyle.SP_ComputerIcon).pixmap(28,28))
+        col = QVBoxLayout()
+        t = QLabel(title); t.setStyleSheet(f"color:{FG};font-weight:600;font-size:14px;")
+        d = QLabel(desc); d.setStyleSheet(f"color:{DIM};font-size:12px;")
+        col.addWidget(t); col.addWidget(d)
+        btn = QPushButton("Install"); btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn.setStyleSheet(f"QPushButton{{background:{ACCENT};color:white;border:none;border-radius:8px;padding:7px 18px;font-weight:600;}}QPushButton:hover{{background:#339cff;}}")
+        btn.clicked.connect(lambda: self.run(action))
+        h.addWidget(ic); h.addLayout(col,1); h.addWidget(btn)
+
+    def run(self, action):
+        proc = subprocess.Popen(
+            ["pkexec", "/usr/lib/aether/scripts/aether-actions.sh", action],
+            stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+        out, _ = proc.communicate()
+        win.log.setText(out.strip()[-600:] or ("Done." if proc.returncode == 0 else f"Exit code {proc.returncode}"))
+        win.log.show()
+
+class Win(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Aether Welcome")
+        self.resize(560, 640)
+        self.setStyleSheet(f"QWidget#root{{background:{BG};}}")
+        outer = QVBoxLayout(self); outer.setContentsMargins(20,20,20,16)
+        head = QLabel("AetherOS"); head.setStyleSheet(f"color:{FG};font-size:26px;font-weight:700;")
+        sub = QLabel("Everything you need, one click away — powered by your Aether kernel.")
+        sub.setStyleSheet(f"color:{DIM};font-size:13px;")
+        outer.addWidget(head); outer.addWidget(sub); outer.addSpacing(8)
+        scroll = QScrollArea(); scroll.setWidgetResizable(True); scroll.setStyleSheet("QScrollArea{border:none;}QScrollArea>QWidget>QWidget{background:transparent;}")
+        box = QWidget(); v = QVBoxLayout(box); v.setSpacing(10)
+        for t, d, a in ACTIONS:
+            v.addWidget(Card(t, d, a))
+        v.addStretch(1); scroll.setWidget(box); outer.addWidget(scroll, 1)
+        self.log = QLabel(""); self.log.setWordWrap(True); self.log.setStyleSheet(f"color:{DIM};font-size:11px;")
+        self.log.hide()
+        self.chk = QCheckBox("Show this window at startup")
+        self.chk.setChecked(True); self.chk.setStyleSheet(f"color:{DIM};font-size:12px;")
+        self.chk.toggled.connect(self.toggle_autostart)
+        outer.addWidget(self.log); outer.addWidget(self.chk)
+
+    def toggle_autostart(self, on):
+        p = os.path.expanduser("~/.config/autostart/aether-welcome.desktop")
+        if on:
+            os.makedirs(os.path.dirname(p), exist_ok=True)
+            with open(p, "w") as f:
+                f.write("[Desktop Entry]\nType=Application\nName=Aether Welcome\nExec=aether-welcome\n")
+        elif os.path.exists(p):
+            os.remove(p)
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    win = Win(); win.show()
+    sys.exit(app.exec())

@@ -1,0 +1,8 @@
+gamemode
+mangohud
+wine
+winetricks
+mesa-vulkan-drivers
+libvulkan1
+va-driver-all
+vdpau-driver-all

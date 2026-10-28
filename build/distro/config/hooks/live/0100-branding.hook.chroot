@@ -1,0 +1,24 @@
+#!/bin/sh
+set -e
+cat > /etc/os-release <<'OSR'
+PRETTY_NAME="AetherOS 1.0 (Nebula)"
+NAME="AetherOS"
+VERSION="1.0 (Nebula)"
+VERSION_ID="1.0"
+ID=aether
+ID_LIKE=debian
+HOME_URL="https://github.com/orubus-dev/Aether-Distro"
+SUPPORT_URL="https://github.com/orubus-dev/Aether-Distro/issues"
+BUG_REPORT_URL="https://github.com/orubus-dev/Aether-Distro/issues"
+VERSION_CODENAME=nebula
+Debian_GPU=trixie
+OSR
+cp /etc/os-release /usr/lib/os-release
+printf 'AetherOS 1.0 (Nebula) \\n \\l\n' > /etc/issue
+printf 'AetherOS 1.0 (Nebula)\n\n' > /etc/motd
+cat > /etc/lsb-release <<'LSB'
+DISTRIB_ID=AetherOS
+DISTRIB_RELEASE=1.0
+DISTRIB_CODENAME=nebula
+DISTRIB_DESCRIPTION="AetherOS 1.0 (Nebula)"
+LSB

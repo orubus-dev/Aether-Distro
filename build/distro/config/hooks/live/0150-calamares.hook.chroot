@@ -1,0 +1,82 @@
+#!/bin/sh
+set -e
+# Aether installer: reuse calamares-settings-debian flow, swap branding + fix paths
+if [ -f /etc/calamares/settings.conf ]; then
+  cp /etc/calamares/settings.conf /etc/calamares/settings.conf.bak
+  sed -i 's/branding: "debian"/branding: "aether"/' /etc/calamares/settings.conf
+fi
+mkdir -p /usr/share/calamares/branding/aether
+cat > /usr/share/calamares/branding/aether/branding.desc <<'BD'
+---
+componentName: aether
+strings:
+    productName:         AetherOS
+    shortProductName:    AetherOS
+    version:             1.0
+    shortVersion:        1.0
+    versionedName:       AetherOS 1.0 (Nebula)
+    shortVersionedName:  AetherOS 1.0
+    bootloaderEntryName: AetherOS
+images:
+    productLogo:         "aether-logo.png"
+    productIcon:         "aether-logo.png"
+    productWelcome:      "aether-logo.png"
+slideshow: "show.qml"
+style:
+   sidebarBackground:    "#202024"
+   sidebarText:          "#eeeeee"
+   sidebarTextSelect:    "#0a84ff"
+BD
+cat > /usr/share/calamares/branding/aether/show.qml <<'QML'
+import QtQuick 2.0;
+Presentation {
+    id: presentation
+    function nextSlide() { presentation.goToNextSlide(); }
+    Timer { interval: 8000; running: true; repeat: true; onTriggered: presentation.nextSlide() }
+    Slide {
+        Text { anchors.centerIn: parent; text: "Welcome to AetherOS"; font.pixelSize: 42; color: "#eeeeee"; font.family: "Inter" }
+        Text { anchors.horizontalCenter: parent.horizontalCenter; anchors.top: parent.verticalCenter; anchors.topMargin: 60; text: "One OS. Linux, Windows and Android apps. Built for your laptop."; font.pixelSize: 20; color: "#9a9aa0" }
+    }
+    Slide {
+        Text { anchors.centerIn: parent; text: "Efficient without underclocking"; font.pixelSize: 36; color: "#eeeeee" }
+        Text { anchors.horizontalCenter: parent.horizontalCenter; anchors.top: parent.verticalCenter; anchors.topMargin: 60; text: "zram memory layering, thermal management, full performance when you need it."; font.pixelSize: 20; color: "#9a9aa0" }
+    }
+}
+QML
+cat > /usr/share/calamares/branding/aether/aether-logo.png <<'LOGO'
+LOGO
+# real logo: small generated PNG
+python3 - <<'PY'
+import struct, zlib
+W=H=256
+rows=b""
+for y in range(H):
+    row=b"\x00"
+    for x in range(W):
+        dx,dy=x-128,y-128; r=(dx*dx+dy*dy)**0.5
+        if r<110 and not (60<abs(dx) and 60<abs(dy)): c=(10,132,255)
+        elif r<110: c=(38,28,84)
+        else: c=(0,0,0)
+        row+=bytes(c)
+    rows+=row
+def chunk(t,d):
+    import struct as s, zlib as z
+    c=s.pack(">I",len(d))+t+d; return c+s.pack(">I",z.crc32(t+d)&0xffffffff)
+png=b"\x89PNG\r\n\x1a\n"+chunk(b"IHDR",struct.pack(">IIBBBBB",W,H,8,2,0,0,0))+chunk(b"IDAT",zlib.compress(rows,9))+chunk(b"IEND",b"")
+open("/usr/share/calamares/branding/aether/aether-logo.png","wb").write(png)
+PY
+# installer desktop entry for live session
+mkdir -p /usr/share/applications
+cat > /usr/share/applications/install-aetheros.desktop <<'IA'
+[Desktop Entry]
+Type=Application
+Name=Install AetherOS
+Comment=Install AetherOS to this computer
+Exec=sudo calamares
+Icon=calamares
+Terminal=false
+Categories=System;
+IA
+# ensure live user can sudo (calamares uses pkexec/sudo)
+usermod -aG sudo aether 2>/dev/null || true
+echo "aether ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/live-aether 2>/dev/null || true

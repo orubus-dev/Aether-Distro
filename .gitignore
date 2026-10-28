@@ -1,4 +1,6 @@
-build/
+build/test_*
+build/*.o
+build/aether-init
 out/
 target/
 *.o
@@ -11,3 +13,14 @@ target/
 .vscode/
 .idea/
 .DS_Store
+dist/
+build/kernel/linux-*/
+build/kernel/pkg/
+build/distro/chroot/
+build/distro/.build/
+build/distro/cache/
+build/distro/binary/
+build/distro/images/
+build/distro/config/packages.chroot/
+build/distro/local*
+*.iso

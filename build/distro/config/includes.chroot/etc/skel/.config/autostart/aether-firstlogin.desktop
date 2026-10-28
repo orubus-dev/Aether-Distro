@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Name=Aether Setup
+Exec=/usr/lib/aether/scripts/firstlogin.sh
+X-GNOME-Autostart-enabled=true
+NoDisplay=true

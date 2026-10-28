@@ -1,0 +1,24 @@
+#!/bin/sh
+set -e
+# compile aetherfetch with the real toolchain, then strip the toolchain again (size discipline)
+cp /usr/lib/aether/src/aetherfetch.c /tmp/aetherfetch.c
+apt-get install -y -o Acquire::Retries=5 gcc libc6-dev >/dev/null 2>&1
+gcc -O2 -std=gnu11 -o /usr/local/bin/aetherfetch /tmp/aetherfetch.c
+/usr/local/bin/aetherfetch || true
+rm -f /tmp/aetherfetch.c
+# welcome app entry points
+chmod 755 /usr/bin/aether-welcome /usr/lib/aether/scripts/firstlogin.sh /usr/lib/aether/scripts/aether-actions.sh
+# konsole: dark + Inter Mono
+mkdir -p /etc/skel/.local/share/konsole
+cat > /etc/skel/.local/share/konsole/Aether.profile <<'KP'
+[Appearance]
+ColorScheme=BreezeDark
+Font=Monospace,10,-1,5,50,0,0,0,0,0
+
+[General]
+Name=Aether
+KP
+cat > /etc/skel/.config/konsolerc <<'KC'
+[Desktop Entry]
+DefaultProfile=Aether.profile
+KC

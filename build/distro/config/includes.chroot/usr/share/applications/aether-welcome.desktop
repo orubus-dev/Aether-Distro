@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Aether Welcome
+Comment=Set up your AetherOS — apps, gaming, Android
+Exec=aether-welcome
+Icon=applications-system
+Terminal=false
+Categories=System;

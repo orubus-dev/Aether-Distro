@@ -1,0 +1,14 @@
+#!/bin/sh
+set -e
+# Waydroid from waydro.id (works out of the box on the Aether kernel: binderfs built-in)
+cd /tmp
+if curl -fsSL -o wd.tgz "https://github.com/waydroid/waydroid/archive/refs/heads/main.tar.gz" 2>/dev/null; then
+  apt-get install -y lxc python3-gbinder libgbinder1 2>/dev/null || apt-get install -y lxc || true
+  for u in \
+    "https://repo.waydro.id/debian/dists/trixie/main/binary-all/waydroid_latest_all.deb" \
+    "https://repo.waydro.id/debian/dists/bookworm/main/binary-all/waydroid_latest_all.deb" ; do
+    curl -fsSL -o /tmp/waydroid.deb "$u" && dpkg -i /tmp/waydroid.deb 2>/dev/null || apt-get install -fy || true && break
+  done
+  rm -f /tmp/waydroid.deb
+fi
+apt-get install -y waydroid 2>/dev/null || true

@@ -1,0 +1,22 @@
+#!/bin/sh
+# AetherOS live-build configuration — Debian 13 floor, our kernel, Plasma 6 desktop.
+lb config noauto \
+  --architecture amd64 \
+  --distribution trixie \
+  --archive-areas "main contrib non-free non-free-firmware" \
+  --binary-image iso-hybrid \
+  --apt apt \
+  --apt-options "--yes -o Acquire::Retries=5" \
+  --linux-packages none \
+  --username aether --password aether \
+  --hostname aetheros \
+  --iso-volume "AetherOS-1.0" \
+  --iso-application "AetherOS 1.0 (Nebula)" \
+  --iso-publisher "Aether Project; https://github.com/orubus-dev/Aether-Distro" \
+  --bootappend-live "boot=live components quiet splash console=ttyS0,115200 console=tty0" \
+  --squashfs-compression zstd \
+  --squashfs-compression-level 19 \
+  --updates true --security true --backports false \
+  --locales en_US.UTF-8 \
+  --timezone Etc/UTC \
+  "${@}"

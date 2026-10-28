@@ -1,0 +1,20 @@
+#!/bin/sh
+set -e
+mkdir -p /etc/gamemode
+cat > /etc/gamemode.ini <<'GM'
+[general]
+renice = 10
+inhibit_screensaver = 1
+
+[custom]
+start = systemctl start power-profiles-daemon
+GM
+cat > /etc/profile.d/aether-gaming.sh <<'GP'
+# MangoHud on demand: run games with `mangohud %command%` (Steam launch options)
+GP
+# i386 for Steam/Wine32 + install Steam launcher
+dpkg --add-architecture i386
+apt-get update -o Acquire::Retries=5
+apt-get install -y -o Acquire::Retries=5 steam-libs-i386 wine32:i386 2>/dev/null || apt-get install -y steam-libs-i386 || true
+curl -fsSL -o /tmp/steam.deb https://steamcdn-a.akamaihd.net/client/installer/steam.deb || true
+[ -f /tmp/steam.deb ] && { dpkg -i /tmp/steam.deb 2>/dev/null || apt-get install -fy || true; rm -f /tmp/steam.deb; }
