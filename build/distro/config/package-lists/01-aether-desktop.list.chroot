@@ -1,6 +1,5 @@
 plasma-desktop
 plasma-workspace
-plasma-workspace-wayland
 kwin-wayland
 kwin-x11
 plasma-nm
@@ -23,7 +22,7 @@ kate
 ark
 gwenview
 okular
-spectacle
+kde-spectacle
 plasma-discover
 plasma-discover-backend-flatpak
 plasma-discover-backend-fwupd

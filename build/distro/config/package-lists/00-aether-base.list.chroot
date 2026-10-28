@@ -1,11 +1,11 @@
 initramfs-tools
 live-boot
 live-config
-live-config-sddm
+live-config-systemd
 live-tools
 sudo
 plymouth
-plymouth-theme-spinner
+plymouth-themes
 grub-efi-amd64-bin
 grub-efi-amd64-signed
 shim-signed
@@ -16,7 +16,8 @@ flatpak
 xdg-user-dirs
 xdg-desktop-portal
 xdg-desktop-portal-kde
-policykit-1
+polkitd
+pkexec
 udisks2
 upower
 fwupd
