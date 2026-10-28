@@ -1,0 +1,18 @@
+#!/bin/sh
+set -e
+# binary_hooks runs AFTER lb binary_syslinux (cfg already generated) and
+# BEFORE lb binary_iso (xorriso) — so edits here land inside the ISO.
+# Make ISOLINUX itself use the serial port: without this the bootloader
+# renders to VGA only, and a CI smoke boot with -display none shows NOTHING
+# (round-8 failure: 25 min of silence — we could not even see the boot: prompt).
+if [ -f binary/isolinux/isolinux.cfg ]; then
+  grep -q "^serial " binary/isolinux/isolinux.cfg || \
+    sed -i '1i serial 0 115200\nconsole 0 115200' binary/isolinux/isolinux.cfg
+fi
+if [ -d binary/isolinux ]; then
+  for f in binary/isolinux/*.cfg; do
+    [ -f "$f" ] || continue
+    grep -q "^serial " "$f" || sed -i '1i serial 0 115200\nconsole 0 115200' "$f"
+  done
+fi
+exit 0

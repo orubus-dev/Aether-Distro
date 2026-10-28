@@ -71,7 +71,7 @@ jobs:
           ISO=$(ls dist/*.iso | head -1)
           ACCEL=tcg
           if [ -w /dev/kvm ]; then ACCEL=kvm; echo "KVM available"; else echo "no KVM — TCG fallback"; fi
-          timeout 1500 qemu-system-x86_64 -machine q35 -m 2048 -smp 2 \
+          timeout 1500 qemu-system-x86_64 -machine pc -m 3072 -smp 2 \
             -accel "$ACCEL" -cdrom "$ISO" -display none -no-reboot \
             -serial file:serial.log || true
           echo "--- serial tail ---"; tail -40 serial.log || true
