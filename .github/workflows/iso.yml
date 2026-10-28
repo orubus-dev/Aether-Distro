@@ -71,12 +71,28 @@ jobs:
           ISO=$(ls dist/*.iso | head -1)
           ACCEL=tcg
           if [ -w /dev/kvm ]; then ACCEL=kvm; echo "KVM available"; else echo "no KVM — TCG fallback"; fi
-          timeout 1500 qemu-system-x86_64 -machine pc -m 3072 -smp 2 \
-            -accel "$ACCEL" -cdrom "$ISO" -display none -no-reboot \
+          # Forensics (rounds 9-10): show the bootloader config actually inside the ISO
+          mkdir -p isopeek
+          xorriso -osirrox on -indev "$ISO" -extract /isolinux isopeek/isolinux 2>/dev/null || true
+          for c in isopeek/isolinux/*.cfg; do echo "### $c"; head -25 "$c"; done
+          # Boot the kernel DIRECTLY (-kernel): proves OUR kernel + initramfs +
+          # squashfs + live userspace without betting on isolinux rendering to a
+          # headless VGA. (isolinux itself stays the stock Debian chain.)
+          KV=$(xorriso -indev "$ISO" -find /live -name 'vmlinuz-*' 2>/dev/null | head -1)
+          test -n "$KV" || { echo "no kernel in /live"; exit 1; }
+          KBASE=$(basename "$KV"); IBASE=$(echo "$KBASE" | sed 's/^vmlinuz/initrd.img/')
+          xorriso -osirrox on -indev "$ISO" -extract "/live/$KBASE" isopeek/vmlinuz
+          xorriso -osirrox on -indev "$ISO" -extract "/live/$IBASE" isopeek/initrd.img
+          test -s isopeek/vmlinuz && test -s isopeek/initrd.img && echo "extracted $KBASE + $IBASE"
+          timeout 900 qemu-system-x86_64 -machine pc -m 3072 -smp 2 \
+            -accel "$ACCEL" -kernel isopeek/vmlinuz -initrd isopeek/initrd.img \
+            -append "boot=live components splash live-config.hostname=aetheros live-config.username=aether live-config.user-default-passwd=aether live-config.locale=en_US.UTF-8 live-config.timezone=Etc/UTC console=ttyS0,115200" \
+            -cdrom "$ISO" -display none -no-reboot \
             -serial file:serial.log || true
-          echo "--- serial tail ---"; tail -40 serial.log || true
+          echo "--- serial head ---"; head -5 serial.log || true
+          echo "--- serial tail ---"; tail -30 serial.log || true
           if grep -qE "Linux version 6\.12" serial.log; then echo "KERNEL BOOTED: AetherOS 6.12 kernel is alive"; else echo "kernel banner not seen"; exit 1; fi
-          grep -qE "Reached target|systemd" serial.log && echo "INIT ALIVE: systemd reached boot targets" || true
+          grep -qE "Reached target|Welcome to|systemd" serial.log && echo "INIT ALIVE: systemd reached boot targets" || true
       - name: Upload ISO artifact
         uses: actions/upload-artifact@v4
         with:
