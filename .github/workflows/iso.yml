@@ -77,13 +77,15 @@ jobs:
           for c in isopeek/isolinux/*.cfg; do echo "### $c"; head -25 "$c"; done
           # Boot the kernel DIRECTLY (-kernel): proves OUR kernel + initramfs +
           # squashfs + live userspace without betting on isolinux rendering to a
-          # headless VGA. (isolinux itself stays the stock Debian chain.)
-          KV=$(xorriso -indev "$ISO" -find /live -name 'vmlinuz-*' 2>/dev/null | head -1)
-          test -n "$KV" || { echo "no kernel in /live"; exit 1; }
-          KBASE=$(basename "$KV"); IBASE=$(echo "$KBASE" | sed 's/^vmlinuz/initrd.img/')
-          xorriso -osirrox on -indev "$ISO" -extract "/live/$KBASE" isopeek/vmlinuz
-          xorriso -osirrox on -indev "$ISO" -extract "/live/$IBASE" isopeek/initrd.img
-          test -s isopeek/vmlinuz && test -s isopeek/initrd.img && echo "extracted $KBASE + $IBASE"
+          # headless VGA. Extracts the UNVERSIONED /live/vmlinuz + /live/initrd.img
+          # — the exact files live.cfg boots — so this also validates that the
+          # bootloader's kernel/initrd references resolve. (xorriso -find output
+          # is shell-quoted — never parse it, use the fixed names.)
+          xorriso -osirrox on -indev "$ISO" -extract /live/vmlinuz isopeek/vmlinuz 2>/dev/null \
+            || { echo "FATAL: /live/vmlinuz missing from ISO — isolinux boot would fail on hardware"; exit 1; }
+          xorriso -osirrox on -indev "$ISO" -extract /live/initrd.img isopeek/initrd.img 2>/dev/null \
+            || { echo "FATAL: /live/initrd.img missing from ISO — isolinux boot would fail on hardware"; exit 1; }
+          test -s isopeek/vmlinuz && test -s isopeek/initrd.img && echo "extracted /live/vmlinuz + /live/initrd.img OK"
           timeout 900 qemu-system-x86_64 -machine pc -m 3072 -smp 2 \
             -accel "$ACCEL" -kernel isopeek/vmlinuz -initrd isopeek/initrd.img \
             -append "boot=live components splash live-config.hostname=aetheros live-config.username=aether live-config.user-default-passwd=aether live-config.locale=en_US.UTF-8 live-config.timezone=Etc/UTC console=ttyS0,115200" \

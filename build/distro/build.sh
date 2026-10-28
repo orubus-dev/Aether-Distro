@@ -36,6 +36,18 @@ case "$STAGE" in
       exit 1
     fi
     ls -la binary/live/
+    # binary_syslinux's live.cfg boots the UNVERSIONED names /live/vmlinuz +
+    # /live/initrd.img (live-build normally creates them in binary_linux-image,
+    # which we skip with --linux-packages none). Real copies, not symlinks —
+    # isolinux cannot follow Rock Ridge symlinks inside ISO9660.
+    KV=$(cd binary/live && ls vmlinuz-* 2>/dev/null | sort -V | tail -1)
+    KI=$(cd binary/live && ls initrd.img-* 2>/dev/null | sort -V | tail -1)
+    if [ -n "$KV" ] && [ -n "$KI" ]; then
+      cp -a "binary/live/$KV" binary/live/vmlinuz
+      cp -a "binary/live/$KI" binary/live/initrd.img
+      echo "[aether] created unversioned /live/vmlinuz + /live/initrd.img (from $KV / $KI)"
+    fi
+    ls -la binary/live/
     lb binary
     mkdir -p "$ISO_OUT"
     # live-build writes the ISO into its CWD (build/distro): find it wherever
