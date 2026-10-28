@@ -38,7 +38,7 @@ fi
 cp .config "$OUT/config-$VER-aether"
 
 JOBS="${AETHER_KERNEL_JOBS:-$(nproc)}"
-make -j"$JOBS" bindeb-pkg LOCALVERSION=-aether KDEB_PKGVERSION="$(echo $VER | tr . _)-1" >/tmp/aether-kernel-build.log 2>&1 || { tail -30 /tmp/aether-kernel-build.log; exit 1; }
+make -j"$JOBS" bindeb-pkg >/tmp/aether-kernel-build.log 2>&1 || { tail -30 /tmp/aether-kernel-build.log; exit 1; }
 echo "[aether-kernel] compiled"
 
 # Repackage as linux-image-aether so live-build --linux-packages none + local deb flow works
