@@ -1,0 +1,49 @@
+name: AetherOS Release
+
+# Publishes a release from an existing AetherOS ISO run's artifact — used when the
+# ISO itself is green but the release step inside that run failed (asset cap etc.).
+on:
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: 'Run ID of the AetherOS ISO run that holds the aetheros-iso artifact'
+        required: true
+        type: string
+      tag:
+        description: 'Tag to release (e.g. v1.0.0)'
+        required: true
+        type: string
+      artifact_url:
+        description: 'Optional single-file artifact URL to advertise in the notes'
+        required: false
+        type: string
+        default: ''
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  release:
+    name: Publish release from existing artifact
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch ISO artifact from the given run
+        uses: actions/download-artifact@v4
+        with:
+          name: aetheros-iso
+          path: dist
+          run-id: ${{ inputs.run_id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Publish
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          TAG: ${{ inputs.tag }}
+          ARTIFACT_URL: ${{ inputs.artifact_url }}
+        run: |
+          ls -la dist/
+          test -s dist/SHA256SUMS || echo "WARN: no SHA256SUMS in artifact"
+          chmod +x ci/release.sh
+          ./ci/release.sh

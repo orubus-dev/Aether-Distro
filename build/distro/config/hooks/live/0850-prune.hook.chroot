@@ -1,0 +1,21 @@
+#!/bin/sh
+# Prune pure bloat from the chroot before squashfs: shrink the ISO toward the
+# 2 GiB single-asset cap without touching a single feature.
+# - noto CJK/extra FULL weight sets (fonts-noto-cjk core keeps regular CJK)
+# - datacenter/switch firmware no laptop ever loads (marvell prestera, tesla gsp)
+# - compilers leaked into the live root (nothing on the ISO compiles at runtime)
+# - docs/man/non-en locales (desktop ships no paper manuals)
+set -e
+export DEBIAN_FRONTEND=noninteractive
+apt-get purge -y --allow-remove-essential \
+  fonts-noto-cjk-extra fonts-noto-extra fonts-noto-ui-extra \
+  firmware-marvell-prestera firmware-nvidia-tesla-535-gsp \
+  breeze-wallpaper \
+  gcc-14 g++-14 cpp-14 gcc-14-x86-64-linux-gnu g++-14-x86-64-linux-gnu \
+  >/dev/null 2>&1 || true
+apt-get autoremove -y >/dev/null 2>&1 || true
+rm -rf /usr/share/doc/* 2>/dev/null || true
+rm -rf /usr/share/man/* /usr/share/man/man* 2>/dev/null || true
+find /usr/share/locale -maxdepth 1 -type d ! -name 'en*' ! -name 'locale' -exec rm -rf {} + 2>/dev/null || true
+rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*.deb /tmp/* /var/tmp/* 2>/dev/null || true
+exit 0
