@@ -2,14 +2,16 @@
 # AetherOS distro assembly (live-build). Stages are resumable:
 #   ./build.sh bootstrap | chroot | binary | all
 set -euo pipefail
-cd "$(dirname "$0")"
+# Resolve the script's directory BEFORE any cd: $0-relative paths break once
+# we cd. Absolute BUILD_DIR + ISO_OUT; a relative ISO_OUT previously resolved
+# against build/distro (and an empty `export V=$(false-cd)` substitution even
+# made it literal "/dist" — export masks substitution failure under set -e).
+BUILD_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
+cd "$BUILD_DIR"
 STAGE="${1:-all}"
 
 # install our kernel + local packages, then assemble
-# ISO_OUT must be ABSOLUTE: build.sh cd's into build/distro, so a relative
-# path would resolve against that CWD and drop the ISO in build/dist instead
-# of <repo>/dist (which is what CI's `ls dist/` + artifact upload expect).
-export ISO_OUT="$(cd "$(dirname "$0")/../.." && pwd)/dist"
+export ISO_OUT="$(cd "$BUILD_DIR/../.." && pwd)/dist"
 
 case "$STAGE" in
   bootstrap) chmod +x auto/config && ./auto/config && lb bootstrap ;;
