@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aether Distro — Boot the full desktop from a USB stick</title>
+<meta name="description" content="AetherOS (Nebula) — a Debian 13 based live Linux distribution. Download the latest CI build directly, verify it, boot it with Ventoy. No flashing required.">
+<meta property="og:title" content="Aether Distro is Live">
+<meta property="og:description" content="Download AetherOS straight from the latest CI build. Live USB, no flashing, Debian 13 base, Linux 6.12.">
+<meta property="og:image" content="/assets/hero.png">
+<link rel="icon" href="/assets/mascot.png">
+<link rel="stylesheet" href="/glass.css">
+</head>
+<body>
+
+<div class="backdrop" aria-hidden="true">
+  <div class="orb orb-a"></div>
+  <div class="orb orb-b"></div>
+  <div class="orb orb-c"></div>
+</div>
+
+<header class="nav glass" id="top">
+  <a class="brand" href="#top">
+    <img src="/assets/mascot.png" alt="" class="brand-avatar">
+    <span class="brand-name">Aether<strong>Distro</strong></span>
+  </a>
+  <nav class="nav-links">
+    <a href="#download">Download</a>
+    <a href="#verify">Verify</a>
+    <a href="#install">Install</a>
+    <a href="#patches">Updates</a>
+    <a href="#features">Features</a>
+    <a href="#faq">FAQ</a>
+  </nav>
+  <a class="nav-cta glass-button small" href="https://github.com/orubus-dev/Aether-Distro" target="_blank" rel="noopener">
+    <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+    GitHub
+  </a>
+</header>
+
+<main>
+  <!-- ================= HERO ================= -->
+  <section class="hero" id="home">
+    <div class="hero-art" aria-hidden="true"></div>
+    <div class="hero-inner">
+      <span class="chip chip-live glass" data-live>
+        <span class="dot"></span> v1.0.0 · Nebula · Live
+      </span>
+      <h1>Aether Distro is <em>Live</em>.</h1>
+      <p class="hero-sub">
+        The full AetherOS desktop — Linux 6.12, Debian 13 base — boots straight
+        from a USB stick. No flashing, no installing, no risk to your machine.
+        Download the <strong>latest CI build</strong> and go.
+      </p>
+      <div class="hero-actions">
+        <a class="glass-button primary" href="/api/download" id="hero-download">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Download latest build
+        </a>
+        <a class="glass-button" href="#verify">Verify it first</a>
+      </div>
+      <ul class="meta-chips" id="build-meta" data-placeholder>
+        <li class="chip glass">build —</li>
+        <li class="chip glass">size —</li>
+        <li class="chip glass">built —</li>
+        <li class="chip glass mono">sha —</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ================= DOWNLOAD ================= -->
+  <section class="section" id="download">
+    <div class="section-head">
+      <h2>Get the ISO</h2>
+      <p>Two ways in. The direct path streams the newest artifact the moment our build farm finishes.</p>
+    </div>
+    <div class="grid two">
+      <article class="card glass feature-card">
+        <div class="card-kicker">Direct from the build</div>
+        <h3>Latest CI artifact</h3>
+        <p class="muted">
+          Every push rebuilds the ISO in CI. The button below hands your browser a
+          signed, time-limited Microsoft edge URL — the bytes never queue behind
+          GitHub's API throttle, so you pull at full link speed.
+        </p>
+        <dl class="facts" id="dl-facts">
+          <div><dt>Run</dt><dd id="f-run">—</dd></div>
+          <div><dt>Artifact</dt><dd id="f-artifact">aetheros-iso</dd></div>
+          <div><dt>Artifact size</dt><dd id="f-size">—</dd></div>
+          <div><dt>Built</dt><dd id="f-date">—</dd></div>
+        </dl>
+        <a class="glass-button primary wide" href="/api/download" id="card-download">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Download <span class="dl-size" id="dl-size-label"></span>
+        </a>
+        <p class="tiny muted" id="download-note">
+          The artifact ships as a ZIP containing the ISO + <span class="mono">SHA256SUMS</span>.
+          ~10-minute signed URL is minted fresh on every click.
+        </p>
+      </article>
+      <article class="card glass">
+        <img class="card-art" src="/assets/mascot.png" alt="AetherOS mascot">
+        <div class="card-kicker">Prefer the classic way?</div>
+        <h3>Stable release · v1.0.0 Nebula</h3>
+        <p class="muted">
+          The tagged release, split into two parts for GitHub's 2 GiB asset cap —
+          concatenate, verify, boot. Same OS, frozen forever.
+        </p>
+        <a class="glass-button wide" href="https://github.com/orubus-dev/Aether-Distro/releases/tag/v1.0.0" target="_blank" rel="noopener">
+          Release page
+        </a>
+      </article>
+    </div>
+  </section>
+
+  <!-- ================= VERIFY ================= -->
+  <section class="section" id="verify">
+    <div class="section-head">
+      <h2>Verify before you boot</h2>
+      <p>Trust, but checksum. The expected SHA-256 for the current build comes straight out of CI's own log.</p>
+    </div>
+    <div class="card glass">
+      <ol class="steps-compact">
+        <li><span>1</span> Download the artifact ZIP and extract it — inside sits the ISO and <span class="mono">SHA256SUMS</span>.</li>
+        <li><span>2</span> In the same folder, run the command for your OS below.</li>
+        <li><span>3</span> Compare against the expected hash. Match = boot it.</li>
+      </ol>
+      <div class="hash-box">
+        <code class="mono" id="expected-sha">fetching expected SHA-256…</code>
+        <button class="glass-button small" id="copy-sha" type="button">Copy</button>
+      </div>
+      <div class="cmd-grid">
+        <div class="cmd glass">
+          <span class="cmd-label">Linux / macOS</span>
+          <code class="mono">shasum -a 256 live-image-amd64.hybrid.iso</code>
+        </div>
+        <div class="cmd glass">
+          <span class="cmd-label">Windows (PowerShell)</span>
+          <code class="mono">Get-FileHash .\live-image-amd64.hybrid.iso -Algorithm SHA256</code>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= INSTALL ================= -->
+  <section class="section" id="install">
+    <div class="section-head">
+      <h2>Install it — no flashing required</h2>
+      <p>Ventoy turns any USB stick into a multiboot drive. Copy the ISO on. That is the whole install.</p>
+    </div>
+    <div class="install-wrap">
+      <img class="install-art glass" src="/assets/install.png" alt="AetherOS mascot holding a glowing USB stick">
+      <ol class="steps">
+        <li class="card glass"><span class="step-num">1</span>
+          <h3>Download the ISO</h3>
+          <p class="muted">Grab the latest build above — or the v1.0.0 release parts.</p>
+        </li>
+        <li class="card glass"><span class="step-num">2</span>
+          <h3>Install Ventoy</h3>
+          <p class="muted">One-time setup from <a href="https://www.ventoy.net" target="_blank" rel="noopener">ventoy.net</a> on any 8&nbsp;GB+ stick.</p>
+        </li>
+        <li class="card glass"><span class="step-num">3</span>
+          <h3>Copy the ISO over</h3>
+          <p class="muted">Drag and drop. No imaging, no dd, nothing overwritten.</p>
+        </li>
+        <li class="card glass"><span class="step-num">4</span>
+          <h3>Reboot &amp; pick AetherOS</h3>
+          <p class="muted">Boot the stick from your BIOS menu. Live desktop in under a minute.</p>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ================= PATCHES ================= -->
+  <section class="section" id="patches">
+    <div class="section-head">
+      <h2>Updates without a reflash</h2>
+      <p>AetherPatch layers signed component updates over the read-only base — on a live USB or an installed disk.</p>
+    </div>
+    <div class="grid three">
+      <article class="card glass">
+        <div class="card-kicker">Layered modules</div>
+        <h3>Component squashfs</h3>
+        <p class="muted">live-boot unions every <span class="mono">/live/*.squashfs</span> in order. A patch is a small new layer dropped onto the stick — the base image never changes.</p>
+      </article>
+      <article class="card glass">
+        <div class="card-kicker">Atomic</div>
+        <h3>Boot-in, boot-out</h3>
+        <p class="muted">Each update activates on next boot. A bad patch? Delete one file — the previous system is untouched underneath. Zero-risk rollback.</p>
+      </article>
+      <article class="card glass">
+        <div class="card-kicker">Signed</div>
+        <h3>Ed25519 channel</h3>
+        <p class="muted"><span class="mono">aether-update check · apply · rollback</span> pulls a signed channel manifest, verifies every module, then installs. Same plumbing for installed systems via apt.</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- ================= FEATURES ================= -->
+  <section class="section" id="features">
+    <div class="section-head">
+      <h2>Why AetherOS</h2>
+      <p>Lighter. Faster. Yours.</p>
+    </div>
+    <div class="grid four">
+      <article class="card glass"><div class="card-kicker">01</div><h3>Live system</h3><p class="muted">Runs entirely from USB. Your disks stay untouched unless you choose to install.</p></article>
+      <article class="card glass"><div class="card-kicker">02</div><h3>Fast &amp; light</h3><p class="muted">Our own 6.12 kernel, trimmed Debian 13 base, boots in seconds on modest hardware.</p></article>
+      <article class="card glass"><div class="card-kicker">03</div><h3>Full experience</h3><p class="muted">Complete desktop with apps ready to go — not a rescue shell, a real daily driver.</p></article>
+      <article class="card glass"><div class="card-kicker">04</div><h3>Stable &amp; secure</h3><p class="muted">Debian 13 foundations, verified ISO structure, QEMU smoke-booted before it ships.</p></article>
+    </div>
+  </section>
+
+  <!-- ================= FAQ ================= -->
+  <section class="section" id="faq">
+    <div class="section-head"><h2>FAQ</h2><p>The things everyone asks first.</p></div>
+    <div class="faq-stack">
+      <details class="glass"><summary>Why is the latest build 2.2 GB when the release was 2.9 GB?</summary>
+        <p>The v1.0.0 release froze an earlier, heavier build (shipped as two 2 GiB-capped parts). The current CI build is the same OS after post-release trimming — the artifact ZIP (~2.25 GB) is exactly the ISO (2.26 GB) plus its checksums. Nothing is missing; newer is just leaner.</p></details>
+      <details class="glass"><summary>Do I really not need to flash the USB stick?</summary>
+        <p>Correct. Ventoy installs once on the stick; after that ISOs are plain files you copy onto it. No dd, no Rufus, no overwriting — and several distros can coexist on one stick.</p></details>
+      <details class="glass"><summary>Does the live session touch my hard drive?</summary>
+        <p>No. The system runs from RAM and the USB stick. Installing to disk is an explicit choice from the desktop installer.</p></details>
+      <details class="glass"><summary>What are the minimum specs?</summary>
+        <p>64-bit CPU, 4 GB RAM for the live desktop, UEFI or legacy BIOS boot, any USB port. The CI job smoke-boots every build under QEMU before publishing the artifact.</p></details>
+    </div>
+  </section>
+</main>
+
+<footer class="footer glass">
+  <img src="/assets/mascot.png" alt="" class="foot-avatar">
+  <div>
+    <div class="brand-name">Aether<strong>Distro</strong></div>
+    <p class="tiny muted">Built with the AetherNet assist layer · Latest build served straight from CI · Lighter / Faster / Yours</p>
+  </div>
+  <nav class="foot-links">
+    <a href="https://github.com/orubus-dev/Aether-Distro" target="_blank" rel="noopener">Source</a>
+    <a href="https://github.com/orubus-dev/Aether-Distro/releases" target="_blank" rel="noopener">Releases</a>
+    <a href="#top">Back to top</a>
+  </nav>
+</footer>
+
+<nav class="tabbar glass" aria-label="Sections">
+  <a href="#home" data-tab><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span>Home</span></a>
+  <a href="#download" data-tab><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg><span>Download</span></a>
+  <a href="#install" data-tab><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><span>Install</span></a>
+  <a href="#faq" data-tab><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><span>FAQ</span></a>
+</nav>
+
+<script src="/app.js"></script>
+</body>
+</html>
